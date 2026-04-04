@@ -1012,6 +1012,7 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
+  const recognitionRef = React.useRef<any>(null);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -1033,21 +1034,77 @@ export default function App() {
   // Voice-to-Text using Web Speech API
   const toggleVoice = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) { alert('Speech recognition is not supported in this browser. Use Chrome.'); return; }
-    if (isListening) { setIsListening(false); return; }
+    if (!SpeechRecognition) { 
+      alert('Speech recognition is not supported in this browser. Please use Google Chrome.'); 
+      return; 
+    }
+
+    // If already listening, stop the recognition
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+      setIsListening(false);
+      return;
+    }
+
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
-    recognition.interimResults = false;
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    setIsListening(true);
-    recognition.start();
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setChatInput(prev => prev ? prev + ' ' + transcript : transcript);
-      setIsListening(false);
+
+    // Track the base text that was in the input before we started listening
+    const baseText = chatInput;
+
+    recognition.onstart = () => {
+      setIsListening(true);
     };
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
+        }
+      }
+      const combined = (finalTranscript + interimTranscript).trim();
+      if (combined) {
+        setChatInput(baseText ? baseText + ' ' + combined : combined);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        alert('Microphone access was denied. Please allow microphone permissions in your browser settings and try again.');
+      } else if (event.error === 'no-speech') {
+        // No speech detected — silently stop
+      } else {
+        alert(`Speech recognition error: ${event.error}. Please try again.`);
+      }
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+
+    try {
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to start speech recognition:', err);
+      alert('Could not start the microphone. Please check your browser permissions.');
+      setIsListening(false);
+      recognitionRef.current = null;
+    }
   };
 
   const handleChatSubmit = async (e: React.FormEvent) => {

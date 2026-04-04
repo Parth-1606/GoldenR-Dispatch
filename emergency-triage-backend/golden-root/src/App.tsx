@@ -271,7 +271,7 @@ const MiniMapPreview = ({ emergencies }: { emergencies: Emergency[] }) => {
   } : { x: 70, y: 70 };
 
   return (
-    <div className="w-full h-full relative cursor-pointer" onClick={() => window.location.href = 'http://localhost:5173'}>
+    <div className="w-full h-full relative cursor-pointer" onClick={() => window.location.href = 'https://localhost:5173'}>
       {/* Background Map Grid */}
       <div className="absolute inset-0 opacity-[0.03]">
         <div className="h-full w-full" style={{ 
@@ -760,7 +760,7 @@ const Hero = ({ setView }: { setView: (v: View) => void }) => {
         params.append('lat', lat.toString());
         params.append('lng', lng.toString());
       }
-      window.location.href = `http://localhost:5173?${params.toString()}`;
+      window.location.href = `https://localhost:5173?${params.toString()}`;
     };
 
     if ("geolocation" in navigator) {
@@ -1456,20 +1456,20 @@ const ManualView = () => {
           console.log("GPS Signal Lock Acquired:", position.coords);
           // Redirect with the acquired context
           setTimeout(() => {
-            window.location.href = `http://localhost:5173/?emergency=${id}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
+            window.location.href = `https://localhost:5173/?emergency=${id}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
           }, 1500); // 1.5s visual confirmation
         },
         (error) => {
           console.warn("GPS Signal Denied, proceeding with default Pune location data:", error);
           setTimeout(() => {
-            window.location.href = `http://localhost:5173/?emergency=${id}`;
+            window.location.href = `https://localhost:5173/?emergency=${id}`;
           }, 1500);
         },
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     } else {
       setTimeout(() => {
-        window.location.href = `http://localhost:5173/?emergency=${id}`;
+        window.location.href = `https://localhost:5173/?emergency=${id}`;
       }, 1500);
     }
   };
@@ -1871,7 +1871,7 @@ export default function App() {
                       </p>
                       <div className="flex gap-4">
                         <button 
-                          onClick={() => window.location.href = 'http://localhost:5173'}
+                          onClick={() => window.location.href = 'https://localhost:5173'}
                           className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:scale-105 transition-all shadow-xl flex items-center gap-3 group"
                         >
                           <Ambulance className="w-5 h-5 group-hover:animate-bounce" />
@@ -1887,7 +1887,7 @@ export default function App() {
                     </div>
                     <div 
                       className="lg:w-1/2 h-[450px] rounded-[40px] bg-slate-50 border border-slate-200 shadow-inner overflow-hidden relative cursor-pointer group/map"
-                      onClick={() => window.location.href = 'http://localhost:5173'}
+                      onClick={() => window.location.href = 'https://localhost:5173'}
                     >
                       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?q=80&w=2006&auto=format&fit=crop')] bg-cover opacity-10 grayscale group-hover:opacity-20 transition-opacity" />
                        <MiniMapPreview emergencies={emergencies} />
