@@ -6,7 +6,11 @@ const redis = require('./db/redis');
 const { initWebSocket } = require('./websocket/broadcaster');
 const { startSimulation, stopSimulation } = require('./services/simulationEngine');
 
-const PORT = parseInt(process.env.PORT) || 3001;
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 
 const startServer = async () => {
   console.log('\n========================================');
@@ -65,13 +69,13 @@ const startServer = async () => {
         const { pool } = require('./db/postgres');
         await pool.end();
         console.log('[Server] PostgreSQL pool closed');
-      } catch (e) {}
+      } catch (e) { }
       process.exit(0);
     });
   };
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT',  () => shutdown('SIGINT'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 };
 
 startServer();
